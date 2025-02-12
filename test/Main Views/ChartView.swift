@@ -64,7 +64,7 @@ struct ChartView: View
                                 symbol in Text(symbol).tag(symbol)
                             }
                         }
-                        .pickerStyle(WheelPickerStyle())
+                        .pickerStyle(MenuPickerStyle())
                         .onChange(of: symbolLoader.selectedSymbol)
                         {
                             print("Selected Symbol: \(symbolLoader.selectedSymbol)")
@@ -143,7 +143,7 @@ struct ChartView: View
         }
         .padding()
         
-        //Dynamic Chart Pickers
+        // UI Changes
         .onChange(of: symbolLoader.selectedSymbol)
         {
             [symbolLoader] in fetchKlineData(symbol: symbolLoader.selectedSymbol, interval: selectedInterval, completion:
