@@ -21,7 +21,8 @@ enum Source: String, CaseIterable, Identifiable
 enum Ticker: String, CaseIterable, Identifiable
 {
     case btcusdt = "BTCUSDT"
-    var id: Self
+    case ethusdt = "ETHUSDT"
+    var id: Self 
     {
         self
     }

@@ -27,3 +27,15 @@ struct KlineData: Identifiable
         self.volume = volume
     }
 }
+
+// Exchange Info Model
+struct ExchangeInfo: Codable
+{
+    let symbols: [SymbolInfo]
+}
+
+// Symbol Info Model
+struct SymbolInfo: Codable
+{
+    let symbol: String
+}

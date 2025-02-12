@@ -23,6 +23,7 @@ struct NewsView: View
                 }
             }
         }
+        
     }
 }
 

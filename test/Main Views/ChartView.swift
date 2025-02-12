@@ -13,9 +13,10 @@ import Foundation
 struct ChartView: View
 {
     @State private var selectedSource: Source = Source.binanceUS
-    @State private var selectedTicker: Ticker = Ticker.btcusdt
     @State private var selectedInterval: KlineInterval = KlineInterval.oneDay
     @State private var klineData: [KlineData] = []
+    @StateObject private var symbolLoader = SymbolLoader()
+    
     
     // UI Elements
     var body: some View
@@ -37,14 +38,6 @@ struct ChartView: View
                 }
                 VStack
                 {
-                    Text("Symbol").font(.headline)
-                    Picker("Symbol", selection: $selectedTicker)
-                    {
-                        Text("BTC").tag(Ticker.btcusdt)
-                    }
-                }
-                VStack
-                {
                     Text("Interval").font(.headline)
                     Picker("Interval", selection: $selectedInterval)
                     {
@@ -55,6 +48,29 @@ struct ChartView: View
                         }
                     }
                 }
+                VStack
+                {
+                    if symbolLoader.symbols.isEmpty
+                    {
+                        Text("Loading...")
+                    }
+                    else
+                    {
+                        Text("Symbol").font(.headline)
+                        Picker("Symbol", selection: $symbolLoader.selectedSymbol)
+                        {
+                            ForEach(symbolLoader.symbols, id: \.self)
+                            {
+                                symbol in Text(symbol).tag(symbol)
+                            }
+                        }
+                        .pickerStyle(WheelPickerStyle())
+                        .onChange(of: symbolLoader.selectedSymbol)
+                        {
+                            print("Selected Symbol: \(symbolLoader.selectedSymbol)")
+                        }
+                    }
+                }
             }
             
             // Chart Element
@@ -62,7 +78,7 @@ struct ChartView: View
             {
                 Text("Loading data...").onAppear
                 {
-                    fetchKlineData(symbol: selectedTicker.rawValue, interval: selectedInterval, completion:
+                    fetchKlineData(symbol: symbolLoader.selectedSymbol, interval: selectedInterval, completion:
                     {
                         result in switch result
                         {
@@ -126,9 +142,37 @@ struct ChartView: View
             }
         }
         .padding()
+        
+        //Dynamic Chart Pickers
+        .onChange(of: symbolLoader.selectedSymbol)
+        {
+            [symbolLoader] in fetchKlineData(symbol: symbolLoader.selectedSymbol, interval: selectedInterval, completion:
+            {
+                result in switch result
+                {
+                case .success(let klineData):
+                    DispatchQueue.main.async
+                    {
+                        self.klineData = klineData.map
+                        {
+                            kline in KlineData(
+                                openTime: kline[0] as? Int ?? 0,
+                                open: Double(kline[1] as? String ?? "0") ?? 0.0,
+                                high: Double(kline[2] as? String ?? "0") ?? 0.0,
+                                low: Double(kline[3] as? String ?? "0") ?? 0.0,
+                                close: Double(kline[4] as? String ?? "0") ?? 0.0,
+                                volume: Double(kline[5] as? String ?? "0") ?? 0.0
+                            )
+                        }.reversed()
+                    }
+                    case .failure(let error):
+                    print("Error fetching kline data: \(error)")
+                }
+            })
+        }
         .onChange(of: selectedInterval)
         {
-            [selectedInterval] in fetchKlineData(symbol: selectedTicker.rawValue, interval: selectedInterval, completion:
+            [selectedInterval] in fetchKlineData(symbol: symbolLoader.selectedSymbol, interval: selectedInterval, completion:
             {
                 result in switch result
                 {
@@ -156,6 +200,7 @@ struct ChartView: View
 }
 
 
-#Preview {
+#Preview
+{
     ChartView()
 }

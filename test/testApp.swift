@@ -14,9 +14,7 @@ struct testApp: App
     {
         WindowGroup
         {
-            MainView()
-            SplashView()
-            ChartView()
+            MenuView()
         }
     }
 }

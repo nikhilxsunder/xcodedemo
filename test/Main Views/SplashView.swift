@@ -16,7 +16,7 @@ struct SplashView: View
         {
             if self.isActive
             {
-                MainView()
+                MenuView()
             }
             else
             {
